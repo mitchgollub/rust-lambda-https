@@ -1,0 +1,5 @@
+{
+    "host": "google.com",
+    "path": "/",
+    "httpVerb": "GET"
+}

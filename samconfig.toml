@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "rust-lambda-https"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-ah234sx7u3gs"
+s3_prefix = "rust-lambda-https"
+region = "us-east-2"
+capabilities = "CAPABILITY_IAM"
+

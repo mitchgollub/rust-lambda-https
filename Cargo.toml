@@ -1,0 +1,23 @@
+[package]
+name = "rust-lambda-https"
+version = "0.1.0"
+authors = ["mitchgollub <mgollub@live.com>"]
+edition = "2018"
+autobins=false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lambda = { git = "https://github.com/awslabs/aws-lambda-rust-runtime/", branch = "master"}
+serde = "^1"
+serde_json = "^1"
+serde_derive = "^1"
+tokio = { version = "0.2.21", features = ["full"] }
+hyper = "0.13"
+rustls = "0.18"
+webpki = "0.21.0"
+webpki-roots = "0.20"
+
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"
