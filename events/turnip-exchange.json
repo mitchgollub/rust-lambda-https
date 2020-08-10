@@ -1,0 +1,6 @@
+{
+    "host": "api.turnip.exchange",
+    "path": "/islands",
+    "httpVerb": "POST",
+    "postData": "{\"islander\":\"neither\",\"category\":\"turnips\"}"
+}

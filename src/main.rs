@@ -10,11 +10,13 @@ use webpki_roots;
 type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct CustomEvent {
     host: String,
     path: String,
-    #[serde(rename = "httpVerb")]
     http_verb: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    post_data: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -42,8 +44,21 @@ async fn main(event: CustomEvent, _: Context) -> Result<CustomOutput, Error> {
         path = event.path.as_str()
     ));
     http_request.push_str(&format!("Host: {}\r\n", event.host.as_str()));
-    http_request.push_str("Connection: close\r\n");
-    http_request.push_str("Accept-Encoding: identity\r\n");
+
+    match event.post_data {
+        Some(post_data) => {
+            http_request.push_str("Connection: keep-alive\r\n");
+            http_request.push_str("Content-Type: application/json\r\n");
+            http_request.push_str("User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0\r\n");
+            http_request.push_str("Accept: application/json\r\n");
+            http_request.push_str("\r\n");
+            http_request.push_str(post_data.as_str());
+        }
+        None => {
+            http_request.push_str("Connection: close\r\n");
+            http_request.push_str("Accept-Encoding: identity\r\n");
+        }
+    }
     http_request.push_str("\r\n");
 
     tls.write(http_request.as_bytes()).unwrap();
