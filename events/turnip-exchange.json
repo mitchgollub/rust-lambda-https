@@ -1,5 +1,5 @@
 {
-    "host": "api.turnip.exchange",
+    "host": "https://api.turnip.exchange",
     "path": "/islands",
     "httpVerb": "POST",
     "postData": "{\"islander\":\"neither\",\"category\":\"turnips\"}"

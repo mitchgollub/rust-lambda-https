@@ -1,11 +1,6 @@
+use hyper::{Body, Client, Method, Request};
 use lambda::{lambda, Context};
-use rustls;
 use serde_derive::{Deserialize, Serialize};
-use std::io::{Read, Write};
-use std::net::TcpStream;
-use std::sync::Arc;
-use webpki;
-use webpki_roots;
 
 type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
@@ -15,8 +10,8 @@ struct CustomEvent {
     host: String,
     path: String,
     http_verb: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    post_data: Option<String>,
+    #[serde(default)]
+    post_data: String,
 }
 
 #[derive(Serialize)]
@@ -27,46 +22,28 @@ struct CustomOutput {
 #[lambda]
 #[tokio::main]
 async fn main(event: CustomEvent, _: Context) -> Result<CustomOutput, Error> {
-    let mut config = rustls::ClientConfig::new();
-    config
-        .root_store
-        .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+    let https = hyper_rustls::HttpsConnector::new();
 
-    let dns_name = webpki::DNSNameRef::try_from_ascii_str(event.host.as_str()).unwrap();
-    let mut sess = rustls::ClientSession::new(&Arc::new(config), dns_name);
-    let mut sock = TcpStream::connect(format!("{}:443", event.host)).unwrap();
-    let mut tls = rustls::Stream::new(&mut sess, &mut sock);
-    let mut http_request: String = String::from("");
+    let client: Client<_, hyper::Body> = Client::builder().build(https);
 
-    http_request.push_str(&format!(
-        "{verb} {path} HTTP/1.1\r\n",
-        verb = event.http_verb.as_str(),
-        path = event.path.as_str()
-    ));
-    http_request.push_str(&format!("Host: {}\r\n", event.host.as_str()));
+    let req = Request::builder()
+        .method(Method::from_bytes(event.http_verb.as_bytes()).unwrap())
+        .uri(format!(
+            "{host}{path}",
+            host = event.host,
+            path = event.path
+        ))
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0",
+        )
+        .body(Body::from(event.post_data))
+        .unwrap();
 
-    match event.post_data {
-        Some(post_data) => {
-            http_request.push_str("Connection: keep-alive\r\n");
-            http_request.push_str("Content-Type: application/json\r\n");
-            http_request.push_str("User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0\r\n");
-            http_request.push_str("Accept: application/json\r\n");
-            http_request.push_str("\r\n");
-            http_request.push_str(post_data.as_str());
-        }
-        None => {
-            http_request.push_str("Connection: close\r\n");
-            http_request.push_str("Accept-Encoding: identity\r\n");
-        }
-    }
-    http_request.push_str("\r\n");
+    let res = client.request(req).await?;
 
-    tls.write(http_request.as_bytes()).unwrap();
-
-    let mut plaintext = Vec::new();
-    tls.read_to_end(&mut plaintext).unwrap();
-
+    let buf = hyper::body::to_bytes(res).await?;
     Ok(CustomOutput {
-        message: format!("Body: {}", String::from_utf8(plaintext).unwrap()),
+        message: format!("Body: {:?}", buf),
     })
 }
