@@ -12,10 +12,9 @@ lambda = { git = "https://github.com/awslabs/aws-lambda-rust-runtime/", branch =
 serde = "^1"
 serde_json = "^1"
 serde_derive = "^1"
-tokio = { version = "0.2.21", features = ["full"] }
-http = "0.2"
-hyper = "0.13"
-hyper-rustls = "0.21"
+tokio = { version = "0.2.25", features = ["full"] } # required dependency version ^0.2
+surf = { version = "2.2.0", default-features = false, features = ["h1-client-rustls", "middleware-logger", "encoding"] }
+futures = "0.3.15"
 
 [[bin]]
 name = "bootstrap"

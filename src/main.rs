@@ -1,10 +1,11 @@
-use hyper::{Body, Client, Method, Request};
 use lambda::{lambda, Context};
 use serde_derive::{Deserialize, Serialize};
+use surf::http::Method;
+use surf::Url;
 
 type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct CustomEvent {
     host: String,
@@ -22,28 +23,35 @@ struct CustomOutput {
 #[lambda]
 #[tokio::main]
 async fn main(event: CustomEvent, _: Context) -> Result<CustomOutput, Error> {
-    let https = hyper_rustls::HttpsConnector::new();
-
-    let client: Client<_, hyper::Body> = Client::builder().build(https);
-
-    let req = Request::builder()
-        .method(Method::from_bytes(event.http_verb.as_bytes()).unwrap())
-        .uri(format!(
-            "{host}{path}",
-            host = event.host,
-            path = event.path
-        ))
-        .header(
-            "User-Agent",
-            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0",
+    dbg!(&event);
+    let url = Url::parse(&format!(
+        "{host}{path}",
+        host = event.host,
+        path = event.path
+    ))?;
+    let mut res = surf::Client::new()
+        .send(
+            surf::RequestBuilder::new(parse_http_method(&event.http_verb), url)
+                .body(event.post_data)
+                .header(
+                    "User-Agent",
+                    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0",
+                )
+                .build(),
         )
-        .body(Body::from(event.post_data))
-        .unwrap();
+        .await?;
+    let body = res.body_string().await?;
+    dbg!(&body);
 
-    let res = client.request(req).await?;
-
-    let buf = hyper::body::to_bytes(res).await?;
     Ok(CustomOutput {
-        message: format!("Body: {:?}", buf),
+        message: format!("Body: {}", body),
     })
+}
+
+fn parse_http_method(input_method: &str) -> Method {
+    match input_method {
+        "GET" => Method::Get,
+        "POST" => Method::Post,
+        _ => panic!("No matching HTTP method for {}", input_method),
+    }
 }

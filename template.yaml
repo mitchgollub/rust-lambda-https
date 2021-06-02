@@ -11,3 +11,6 @@ Resources:
       Description: ''
       MemorySize: 128
       Timeout: 3
+      Environment:
+        Variables:
+          RUST_BACKTRACE: 1
