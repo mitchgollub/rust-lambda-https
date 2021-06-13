@@ -1,6 +1,6 @@
 # rust-lambda-https
 
-This repository illustrates a way to use Rust with AWS Lambda.  The Lambda uses bootstrap code provided by AWS that allows for Rust code to run in AWS Lambda.  The example in this repo uses [surf](https://docs.rs/surf/2.2.0/surf/) to make an HTTPS request that is described in the event.  More details in this blog post: <https://github.com/mitchgollub/rust-lambda-https>.
+This repository illustrates a way to use Rust with AWS Lambda.  The Lambda uses bootstrap code provided by AWS that allows for Rust code to run in AWS Lambda.  The example in this repo uses [surf](https://docs.rs/surf/2.2.0/surf/) to make an HTTPS request that is described in the event.  More details in this blog post: <https://mitchgollub.com/rust-and-aws-lambda/>.
 
 ## Develop
 
