@@ -1,6 +1,6 @@
-mod client_factory;
+mod client;
 
-use client_factory::RustLambdaHttpClient;
+use client::RustLambdaHttpClient;
 use lambda::{handler_fn, Context};
 use serde_derive::{Deserialize, Serialize};
 
