@@ -1,7 +1,8 @@
 mod client;
 
 use client::RustLambdaHttpClient;
-use lambda::{handler_fn, Context};
+// use lambda::{handler_fn, Context};
+use lambda_runtime::{handler_fn, Context};
 use serde_derive::{Deserialize, Serialize};
 
 type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
@@ -25,7 +26,7 @@ struct CustomOutput {
 async fn main() -> Result<(), Error> {
     let client = RustLambdaHttpClient::new();
     let client_ref = &client;
-    lambda::run(handler_fn(
+    lambda_runtime::run(handler_fn(
         move |event: CustomEvent, _ctx: Context| async move {
             dbg!(&event);
             let url = format!("{host}{path}", host = event.host, path = event.path);
