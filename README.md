@@ -22,9 +22,9 @@ Use the `run.sh` script at the root of the directory to build and run (locally) 
 
 Run `sam deploy --guided` to deploy the lambda into your AWS account (as shown in [Deploy your application to the AWS Cloud](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-hello-world.html#serverless-getting-started-hello-world-deploy)).  Use the stack name `rust-lambda-https`.
 
-Test the Lambda by going to the Test tab for your function in the AWS console. create a test event using one on the examples within `events`.
+Test the Lambda by going to the Test tab for your function in the AWS console. create a test event using one of the examples within `events`.
 
 Clean up your resources by running `aws cloudformation delete-stack --stack-name rust-lambda-https --region <region>` (as shown in [Clean up](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-hello-world.html#serverless-getting-started-hello-world-cleanup)).
 
-SAM create an S3 bucket during deployment that isn't removed. You probably want to keep this if you intend to use SAM again in the future, but you may wish to delete experimental deployments within it.
+SAM will have created an S3 bucket during deployment that isn't removed. You probably want to keep this if you intend to use SAM again in the future, but you may wish to delete experimental deployments within it.
 
